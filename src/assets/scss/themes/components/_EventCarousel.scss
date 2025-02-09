@@ -1,0 +1,180 @@
+.carousel-container {
+  padding: 10px;
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  margin: auto;
+  text-align: center;
+  background: transparent;
+
+  .filter-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 5px;
+
+    button {
+      padding: 5px 8px;
+      font-size: 10px;
+      border: none;
+      cursor: pointer;
+      color: black;
+      border-color: black;
+      border-radius: 5px;
+      transition: background 0.3s ease;
+
+      &:hover {
+        background-color: #DFFF47;
+        color: black;
+
+      }
+    }
+  }
+
+  .event-swiper {
+    width: 100%;
+    height: auto;
+  }
+
+  .event-slide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    min-height: 380px;
+    background: transparent;
+    border-radius: 8px;
+    .event-details{
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #DCDEE0;
+      width: 100%;
+      border-radius: 10px;
+    }
+    .event-stats{
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #DCDEE0;
+      width: 100%;
+      border-radius: 10px;
+    }
+    .event-stats p{
+
+    }
+    .event-header {
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      position: relative;
+      margin-bottom: 10px;
+
+      h3 {
+        margin: 0;
+        color: #333;
+        font-size: 1.5rem;
+        flex-grow: 1;
+        text-align: center;
+      }
+
+      .swiper-navigation-buttons {
+        position: absolute;
+        right: 0;
+        display: flex;
+        align-items: center;
+
+
+      }
+    }
+
+    p {
+      margin: 5px 0;
+      color: #555;
+      font-size: 1rem;
+
+      strong {
+        color: #222;
+      }
+    }
+  }
+
+  @media (max-width: 768px) {
+    .event-slide {
+      padding: 1px;
+
+      h3 {
+        font-size: 1.2rem;
+      }
+
+      p {
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    .filter-buttons {
+      flex-direction: column;
+      gap: 5px;
+
+      button {
+        width: 100%;
+        font-size: 14px;
+        padding: 8px;
+      }
+    }
+
+    .event-slide {
+      padding: 10px;
+
+      h3 {
+        font-size: 1rem;
+      }
+
+      p {
+        font-size: 0.8rem;
+      }
+    }
+  }
+}
+/////////////////////////////////////
+// carousel buttons
+////////////////////////////////////
+.event-swiper {
+  .swiper-button-prev,
+  .swiper-button-next {
+    position: absolute;
+    top: 45px;
+    color: rgba(0, 0, 0, 0.2); // Color del ícono
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.3s ease;
+
+    &:hover {
+      color: rgba(0, 0, 0, 0.8); // Más oscuro al pasar el mouse
+    }
+  }
+
+  .swiper-button-prev {
+    left: 1px; // Ajusta la posición
+  }
+  .swiper-button-next {
+    right: 1px; // Ajusta la posición
+  }
+
+  // Quitar los iconos por defecto y usar SVG personalizados
+  .swiper-button-prev::after,
+  .swiper-button-next::after {
+
+  }
+
+  .swiper-button-prev::after {
+// Usa un icono personalizado
+  }
+
+  .swiper-button-next::after {
+
+  }
+}

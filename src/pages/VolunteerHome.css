@@ -1,0 +1,38 @@
+.volunteer-home {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+.volunteer-home .main-content {
+    padding: 1.5rem;
+}
+
+.volunteer-home .card {
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+.volunteer-home .card-title {
+    color: #495057;
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+/* Ensure the feed takes up remaining height */
+.volunteer-home .feed-section {
+    height: calc(100vh - 400px); /* Adjust based on your header/footer heights */
+    overflow-y: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .volunteer-home .main-content {
+        padding: 1rem;
+    }
+    
+    .volunteer-home .card {
+        margin-bottom: 1rem;
+    }
+}

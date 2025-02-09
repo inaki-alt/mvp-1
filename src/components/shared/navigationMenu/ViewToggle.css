@@ -1,0 +1,102 @@
+.view-toggle-container {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.view-toggle-button {
+    position: relative;
+    width: 200px;
+    height: 48px;
+    border: none;
+    border-radius: 24px;
+    background: rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    padding: 4px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.toggle-icons {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.icon-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    color: rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+.icon-container.active {
+    color: white;
+}
+
+.toggle-icon {
+    font-size: 18px;
+}
+
+.toggle-label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    height: calc(100% - 8px);
+    background: black;
+    border-radius: 20px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.view-toggle-button.volunteer .toggle-slider {
+    transform: translateX(100%);
+}
+
+/* Hover effects */
+.view-toggle-button:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+/* Animation for icons */
+.icon-container {
+    transform: translateY(0);
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.view-toggle-button:hover .icon-container {
+    transform: translateY(-2px);
+}
+
+/* Glow effect */
+.toggle-slider::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background-size: 200% 200%;
+    animation: glow 3s linear infinite;
+    border-radius: 20px;
+}
+
+@keyframes glow {
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 200% 200%;
+    }
+} 
