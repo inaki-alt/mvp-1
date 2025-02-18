@@ -10,7 +10,7 @@ import MegaMenu from './megaManu/MegaMenu';
 import { supabase } from "@/supabaseClient";// Asegúrate de que esta ruta sea correcta
 import { NavigationContext } from '../../../contentApi/navigationProvider';
 import { Link } from 'react-router-dom';
-
+//
 
 const Header = () => {
     const { navigationOpen, setNavigationOpen } = useContext(NavigationContext)
