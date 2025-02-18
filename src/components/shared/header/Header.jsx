@@ -148,7 +148,9 @@ const Header = () => {
                     {!userEmail ? (
                         <nav className="authentication-links">
                             <Link to="/signin" className="btn btn-primary me-2">Sign In</Link>
-                            <Link to="/signup" className="btn btn-outline-primary">Sign Up</Link>
+                            <Link to="/nonprofit-signup" className="btn btn-outline-primary">
+                                Non-Profit Sign Up
+                            </Link>
                         </nav>
                     ) : (
                         <div className="event-header">
