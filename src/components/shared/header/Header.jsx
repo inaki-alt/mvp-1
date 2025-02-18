@@ -12,30 +12,26 @@ import { NavigationContext } from '../../../contentApi/navigationProvider';
 import { Link } from 'react-router-dom';
 
 
-const Header = ({ userEmail }) => {
+const Header = () => {
     const { navigationOpen, setNavigationOpen } = useContext(NavigationContext)
     const [openMegaMenu, setOpenMegaMenu] = useState(false)
     const [navigationExpend, setNavigationExpend] = useState(false)
     const miniButtonRef = useRef(null);
     const expendButtonRef = useRef(null);
+    const [userEmail, setUserEmail] = useState(null);
 
-    // Función para obtener el usuario logueado
-    const fetchUser = async () => {
-        try {
-            const { data: { user }, error } = await supabase.auth.getUser();
-
-            if (error) {
-                console.error('Error fetching user:', error.message);
-                return;
-            }
-
-            setUserEmail(user?.email || 'Guest'); // Guarda el correo del usuario o muestra "Guest"
-        } catch (err) {
-            console.error('Error fetching user:', err.message);
-        }
-    };
     useEffect(() => {
-        fetchUser();
+        // Check auth status when component mounts
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setUserEmail(session?.user?.email || null);
+        });
+
+        // Subscribe to auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUserEmail(session?.user?.email || null);
+        });
+
+        return () => subscription.unsubscribe();
     }, []);
 
     useEffect(() => {
@@ -148,22 +144,17 @@ const Header = ({ userEmail }) => {
     return (
         <header className="nxl-header">
             <div className="header-wrapper">
-                { !userEmail ? (
-                    <nav className="authentication-links">
-                        <Link to="/signin" className="btn btn-link">Sign In</Link>
-                        <Link to="/signup" className="btn btn-link">Sign Up</Link>
-                    </nav>
-                ) : (
-                    <div className="welcome-text">
-                        Welcome, {userEmail}
-                    </div>
-                )}
-
-                {/* <!--! [Start] Header Left !--> */}
                 <div className="header-left d-flex align-items-center gap-4">
-                    <div className="event-header">
-                        <h5>Welcome, {userEmail ? userEmail : 'Loading...'}</h5>
-                    </div>
+                    {!userEmail ? (
+                        <nav className="authentication-links">
+                            <Link to="/signin" className="btn btn-primary me-2">Sign In</Link>
+                            <Link to="/signup" className="btn btn-outline-primary">Sign Up</Link>
+                        </nav>
+                    ) : (
+                        <div className="event-header">
+                            <h5>Welcome, {userEmail}</h5>
+                        </div>
+                    )}
                     {/* <!--! [Start] nxl-head-mobile-toggler !--> */}
                     <a href="#" className="nxl-head-mobile-toggler" onClick={(e) => {
                         e.preventDefault(), setNavigationOpen(true)

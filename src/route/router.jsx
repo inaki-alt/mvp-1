@@ -76,7 +76,6 @@ import EventsManagement from "../components/volunteer/EventsManagement";
 import VolunteerMessages from "../components/volunteer/VolunteerMessages";
 import RewardsMarketplace from "../components/volunteer/RewardsMarketplace";
 import ProtectedRoute from '@/components/ProtectedRoute';
-import Dashboard from '../pages/dashboard';
 
 export const router = createBrowserRouter([
     {
@@ -85,25 +84,19 @@ export const router = createBrowserRouter([
         children: [
             {
                 path: "/",
-                element: <Home />
-
+                element: (
+                    <ProtectedRoute>
+                        <Home />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: "/home",
-                element: <Home />
-
-            },
-
-        ]
-    },
-    {
-        path: "/",
-        element: <RootLayout />,
-        children: [
-            {
-                path: "/home",
-                element:
-                    <Home />
+                element: (
+                    <ProtectedRoute>
+                        <Home />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: "/volunteer/home",
@@ -242,7 +235,6 @@ export const router = createBrowserRouter([
             {
                 path: "/events/calendar",
                 element: <AppsCalender />
-
             },
             {
                 path: "/dashboard",
@@ -356,7 +348,6 @@ export const router = createBrowserRouter([
                 path: "/help/knowledgebase",
                 element: <HelpKnowledgebase />
             },
-
         ]
     },
     {
@@ -456,20 +447,20 @@ export const router = createBrowserRouter([
         element: <LayoutAuth />,
         children: [
             {
-                path: "/signin",
+                path: "signin",
                 element: <LoginMinimal />
             },
             {
-                path: "/signup",
+                path: "signup",
                 element: <RegisterMinimal />
+            },
+            {
+                path: "login",
+                element: <LoginMinimal />
             },
             {
                 path: "/authentication/login/cover",
                 element: <LoginCover />
-            },
-            {
-                path: "/login",
-                element: <LoginMinimal />
             },
             {
                 path: "/authentication/login/creative",
@@ -541,7 +532,7 @@ export const router = createBrowserRouter([
         path: "/dashboard",
         element: (
             <ProtectedRoute>
-                <Dashboard />
+                <Home />
             </ProtectedRoute>
         )
     },
