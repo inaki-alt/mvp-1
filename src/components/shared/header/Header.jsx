@@ -9,15 +9,15 @@ import HeaderDropDownModal from './HeaderDropDownModal';
 import MegaMenu from './megaManu/MegaMenu';
 import { supabase } from "@/supabaseClient";// Asegúrate de que esta ruta sea correcta
 import { NavigationContext } from '../../../contentApi/navigationProvider';
+import { Link } from 'react-router-dom';
 
 
-const Header = () => {
+const Header = ({ userEmail }) => {
     const { navigationOpen, setNavigationOpen } = useContext(NavigationContext)
     const [openMegaMenu, setOpenMegaMenu] = useState(false)
     const [navigationExpend, setNavigationExpend] = useState(false)
     const miniButtonRef = useRef(null);
     const expendButtonRef = useRef(null);
-    const [userEmail, setUserEmail] = useState(null);
 
     // Función para obtener el usuario logueado
     const fetchUser = async () => {
@@ -148,6 +148,16 @@ const Header = () => {
     return (
         <header className="nxl-header">
             <div className="header-wrapper">
+                { !userEmail ? (
+                    <nav className="authentication-links">
+                        <Link to="/signin" className="btn btn-link">Sign In</Link>
+                        <Link to="/signup" className="btn btn-link">Sign Up</Link>
+                    </nav>
+                ) : (
+                    <div className="welcome-text">
+                        Welcome, {userEmail}
+                    </div>
+                )}
 
                 {/* <!--! [Start] Header Left !--> */}
                 <div className="header-left d-flex align-items-center gap-4">

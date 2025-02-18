@@ -75,6 +75,8 @@ import VolunteerHome from "../pages/VolunteerHome";
 import EventsManagement from "../components/volunteer/EventsManagement";
 import VolunteerMessages from "../components/volunteer/VolunteerMessages";
 import RewardsMarketplace from "../components/volunteer/RewardsMarketplace";
+import ProtectedRoute from '@/components/ProtectedRoute';
+import Dashboard from '../pages/dashboard';
 
 export const router = createBrowserRouter([
     {
@@ -454,6 +456,14 @@ export const router = createBrowserRouter([
         element: <LayoutAuth />,
         children: [
             {
+                path: "/signin",
+                element: <LoginMinimal />
+            },
+            {
+                path: "/signup",
+                element: <RegisterMinimal />
+            },
+            {
                 path: "/authentication/login/cover",
                 element: <LoginCover />
             },
@@ -526,5 +536,13 @@ export const router = createBrowserRouter([
                 element: <MaintenanceCreative />
             },
         ]
+    },
+    {
+        path: "/dashboard",
+        element: (
+            <ProtectedRoute>
+                <Dashboard />
+            </ProtectedRoute>
+        )
     },
 ])
