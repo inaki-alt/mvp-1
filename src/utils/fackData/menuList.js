@@ -70,7 +70,7 @@ export const menuList = [
             },
             {
                 id: 1,
-                name: "Email",
+                name: "Broadcast",
                 path: "/messages/email",
                 subdropdownMenu: false
             },

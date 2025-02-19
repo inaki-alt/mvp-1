@@ -1,98 +1,210 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FaTimes } from 'react-icons/fa';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 const EventDetailsForm = ({ event, onSave, onDelete, onClose }) => {
-  // Local state for form fields
-  const [eventName, setEventName] = useState(event.event_name);
-  const [eventLocation, setEventLocation] = useState(event.location || '');
-  const [eventOrganizer, setEventOrganizer] = useState(event.organizer || '');
+  // Derive initial values from event, with defaults as needed
+  const initialEventDate = new Date(event.event_time).toISOString().split('T')[0];
+  const initialStartTime = new Date(event.event_time).toISOString().substr(11, 5);
+  const initialEndTime = event.end_time
+    ? new Date(event.end_time).toISOString().substr(11, 5)
+    : new Date(new Date(event.event_time).getTime() + 60 * 60 * 1000)
+        .toISOString()
+        .substr(11, 5);
+
+  const [eventName, setEventName] = useState(event.event_name || '');
+  const [eventDate, setEventDate] = useState(initialEventDate);
+  const [eventTime, setEventTime] = useState(initialStartTime);
+  const [eventEndTime, setEventEndTime] = useState(initialEndTime);
+  const [locationName, setLocationName] = useState(event.location || '');
+  const [eventAddress, setEventAddress] = useState(event.address || '');
+  const [minVolunteers, setMinVolunteers] = useState(event.min_volunteers || '');
+  const [maxVolunteers, setMaxVolunteers] = useState(event.max_volunteers || '');
   const [eventDescription, setEventDescription] = useState(event.description || '');
-  // Extract time in HH:mm format from the event_time timestamp
-  const initialTime = new Date(event.event_time).toISOString().substr(11, 5);
-  const [eventTime, setEventTime] = useState(initialTime);
+  
+  // State for delete confirmation modal
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  // Calculate event duration (read-only)
+  const calculateDuration = () => {
+    const start = new Date(`${eventDate}T${eventTime}`);
+    const end = new Date(`${eventDate}T${eventEndTime}`);
+    let diff = end - start;
+    if (diff < 0) {
+      diff += 24 * 60 * 60 * 1000; // adjust for events passing midnight
+    }
+    const totalMinutes = Math.floor(diff / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${hours}h ${minutes}m`;
+  };
 
   const handleSave = () => {
-    // Update event_time keeping the original date but with modified hours/minutes
-    const updatedTime = new Date(event.event_time);
-    const [hours, minutes] = eventTime.split(':');
-    updatedTime.setHours(parseInt(hours, 10), parseInt(minutes, 10));
-
+    const startDateTime = new Date(`${eventDate}T${eventTime}`);
+    const endDateTime = new Date(`${eventDate}T${eventEndTime}`);
     const updatedEvent = {
       ...event,
       event_name: eventName,
-      event_time: updatedTime.getTime(),
-      location: eventLocation,
-      organizer: eventOrganizer,
+      event_time: startDateTime.getTime(),
+      end_time: endDateTime.getTime(),
+      location: locationName,
+      address: eventAddress,
+      min_volunteers: parseInt(minVolunteers, 10),
+      max_volunteers: parseInt(maxVolunteers, 10),
       description: eventDescription,
     };
     onSave(updatedEvent);
   };
 
-  const handleDelete = () => onDelete(event);
+  const handleDelete = () => {
+    onDelete(event);
+  };
+
+  const handleConfirmDelete = () => {
+    handleDelete();
+    setDeleteModalOpen(false);
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteModalOpen(false);
+  };
 
   return (
-    <div className="event-details-form p-3" style={{ background: 'white', color: 'black' }}>
-      <div className="d-flex justify-content-between align-items-center mb-3" style={{ background: 'white', color: 'black' }}>
-        <h4 className="mb-0" style={{ background: 'white', color: 'black' }}>Edit Event</h4>
-        <button onClick={onClose} className="btn btn-sm btn-outline-secondary" style={{ background: 'white', color: 'black' }}>
+    <div className="event-details-form card p-4 shadow" style={{ background: '#fff', borderRadius: '10px' }}>
+      <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+        <h4 className="mb-0" style={{ color: '#333' }}>Edit Event</h4>
+        <button onClick={onClose} className="btn btn-sm btn-outline-secondary">
           <FaTimes />
         </button>
       </div>
-      <div className="mb-2" style={{ background: 'white', color: 'black' }}>
-        <label className="form-label" style={{ background: 'white', color: 'black' }}>Event Name</label>
+      
+      <div className="mb-3">
+        <label className="form-label">Event Name</label>
         <input
           type="text"
           className="form-control"
-          style={{ background: 'white', color: 'black' }}
           value={eventName}
           onChange={(e) => setEventName(e.target.value)}
+          placeholder="Enter event name"
         />
       </div>
-      <div className="mb-3" style={{ background: 'white', color: 'black' }}>
-        <label className="form-label" style={{ background: 'white', color: 'black' }}>Event Time</label>
-        <input
-          type="time"
-          className="form-control"
-          style={{ background: 'white', color: 'black' }}
-          value={eventTime}
-          onChange={(e) => setEventTime(e.target.value)}
-        />
+      
+      <div className="row">
+        <div className="col-md-6 mb-3">
+          <label className="form-label">Start Date</label>
+          <input
+            type="date"
+            className="form-control"
+            value={eventDate}
+            onChange={(e) => setEventDate(e.target.value)}
+          />
+        </div>
+        <div className="col-md-6 mb-3">
+          <label className="form-label">Start Time</label>
+          <input
+            type="time"
+            className="form-control"
+            value={eventTime}
+            onChange={(e) => setEventTime(e.target.value)}
+          />
+        </div>
       </div>
-      <div className="mb-3" style={{ background: 'white', color: 'black' }}>
-        <label className="form-label" style={{ background: 'white', color: 'black' }}>Location</label>
-        <input
-          type="text"
-          className="form-control"
-          style={{ background: 'white', color: 'black' }}
-          value={eventLocation}
-          onChange={(e) => setEventLocation(e.target.value)}
-        />
+      
+      <div className="row">
+        <div className="col-md-6 mb-3">
+          <label className="form-label">End Time</label>
+          <input
+            type="time"
+            className="form-control"
+            value={eventEndTime}
+            onChange={(e) => setEventEndTime(e.target.value)}
+          />
+        </div>
+        <div className="col-md-6 mb-3">
+          <label className="form-label">Event Duration</label>
+          <input
+            type="text"
+            className="form-control"
+            value={calculateDuration()}
+            readOnly
+          />
+        </div>
       </div>
-      <div className="mb-3" style={{ background: 'white', color: 'black' }}>
-        <label className="form-label" style={{ background: 'white', color: 'black' }}>Organizer</label>
-        <input
-          type="text"
-          className="form-control"
-          style={{ background: 'white', color: 'black' }}
-          value={eventOrganizer}
-          onChange={(e) => setEventOrganizer(e.target.value)}
-        />
+      
+      <div className="row">
+        <div className="col-md-6 mb-3">
+          <label className="form-label">Location Name</label>
+          <input
+            type="text"
+            className="form-control"
+            value={locationName}
+            onChange={(e) => setLocationName(e.target.value)}
+            placeholder="Enter location name"
+          />
+        </div>
+        <div className="col-md-6 mb-3">
+          <label className="form-label">Location Address</label>
+          <input
+            type="text"
+            className="form-control"
+            value={eventAddress}
+            onChange={(e) => setEventAddress(e.target.value)}
+            placeholder="Enter location address"
+          />
+        </div>
       </div>
-      <div className="mb-3" style={{ background: 'white', color: 'black' }}>
-        <label className="form-label" style={{ background: 'white', color: 'black' }}>Description</label>
+      
+      <div className="row">
+        <div className="col-md-6 mb-3">
+          <label className="form-label">Minimum Number of Volunteers</label>
+          <input
+            type="number"
+            className="form-control"
+            value={minVolunteers}
+            onChange={(e) => setMinVolunteers(e.target.value)}
+            placeholder="Minimum volunteers required"
+            min="0"
+          />
+        </div>
+        <div className="col-md-6 mb-3">
+          <label className="form-label">Maximum Number of Volunteers</label>
+          <input
+            type="number"
+            className="form-control"
+            value={maxVolunteers}
+            onChange={(e) => setMaxVolunteers(e.target.value)}
+            placeholder="Maximum volunteers allowed"
+            min="0"
+          />
+        </div>
+      </div>
+      
+      <div className="mb-3">
+        <label className="form-label">Event Description</label>
         <textarea
           className="form-control"
-          rows="3"
-          style={{ background: 'white', color: 'black' }}
+          rows="4"
           value={eventDescription}
           onChange={(e) => setEventDescription(e.target.value)}
+          placeholder="Describe the event"
         ></textarea>
       </div>
-      <div className="d-flex justify-content-end gap-2" style={{ background: 'white', color: 'black' }}>
-        <button onClick={handleSave} className="btn btn-primary" style={{ background: 'white', color: 'black' }}>Save</button>
-        <button onClick={handleDelete} className="btn btn-danger" style={{ background: 'white', color: 'black' }}>Delete</button>
+      
+      <div className="d-flex justify-content-end gap-2">
+        <button onClick={handleSave} className="btn btn-primary">
+          Save
+        </button>
+        <button onClick={() => setDeleteModalOpen(true)} className="btn btn-danger">
+          Delete
+        </button>
       </div>
+
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 };
