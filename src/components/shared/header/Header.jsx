@@ -3,7 +3,6 @@ import { FiAlignLeft, FiArrowLeft, FiArrowRight, FiChevronRight, FiMaximize, FiM
 import LanguagesModal from './LanguagesModal';
 import NotificationsModal from './NotificationsModal';
 import ProfileModal from './ProfileModal';
-import SearchModal from './SearchModal';
 import TimesheetsModal from './TimesheetsModal';
 import HeaderDropDownModal from './HeaderDropDownModal';
 import MegaMenu from './megaManu/MegaMenu';
@@ -18,17 +17,24 @@ const Header = () => {
     const [navigationExpend, setNavigationExpend] = useState(false)
     const miniButtonRef = useRef(null);
     const expendButtonRef = useRef(null);
-    const [userEmail, setUserEmail] = useState(null);
+    const [userName, setUserName] = useState(null);
 
     useEffect(() => {
         // Check auth status when component mounts
         supabase.auth.getSession().then(({ data: { session } }) => {
-            setUserEmail(session?.user?.email || null);
+            // Get user's name from metadata or profile, fallback to email
+            const name = session?.user?.user_metadata?.full_name || 
+                        session?.user?.user_metadata?.name ||
+                        session?.user?.email?.split('@')[0] || null;
+            setUserName(name);
         });
 
         // Subscribe to auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUserEmail(session?.user?.email || null);
+            const name = session?.user?.full_name || 
+                        session?.user?.name ||
+                        session?.user?.email?.split('@')[0] || null;
+            setUserName(name);
         });
 
         return () => subscription.unsubscribe();
@@ -145,7 +151,7 @@ const Header = () => {
         <header className="nxl-header">
             <div className="header-wrapper">
                 <div className="header-left d-flex align-items-center gap-4">
-                    {!userEmail ? (
+                    {!userName ? (
                         <nav className="authentication-links">
                             <Link to="/signin" className="btn btn-primary me-2">Sign In</Link>
                             <Link to="/nonprofit-signup" className="btn btn-outline-primary">
@@ -153,8 +159,8 @@ const Header = () => {
                             </Link>
                         </nav>
                     ) : (
-                        <div className="event-header">
-                            <h5>Welcome, {userEmail}</h5>
+                        <div className="event-header d-flex align-items-center justify-content-center" style={{ height: '100%' }}>
+                            <h5 className="m-0">Welcome, {userName}</h5>
                         </div>
                     )}
                     {/* <!--! [Start] nxl-head-mobile-toggler !--> */}
@@ -220,7 +226,6 @@ const Header = () => {
                 <!--! [Start] Header Right !--> */}
                 <div className="header-right ms-auto">
                     <div className="d-flex align-items-center">
-                        <SearchModal />
                         <div className="nxl-h-item d-none d-sm-flex" >
                             <div className="HideComponent full-screen-switcher">
                                 <span className="nxl-head-link me-0">
@@ -237,8 +242,6 @@ const Header = () => {
                                 <FiSun size={20} />
                             </div>
                         </div>
-                        <TimesheetsModal />
-                        <NotificationsModal />
                         <ProfileModal />
                     </div>
                 </div>

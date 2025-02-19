@@ -1,5 +1,5 @@
 import React from 'react'
-import { FiBarChart, FiFilter, FiPaperclip, FiPlus } from 'react-icons/fi'
+import { FiBarChart, FiFilter, FiPaperclip, FiPlus, FiX } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 import Dropdown from '@/components/shared/Dropdown'
 import { fileType } from '../leads/VolunteersHeader.jsx'
@@ -19,10 +19,21 @@ const EventsListHeader = () => {
   return (
     <>
       <div className="d-flex align-items-center gap-2 page-header-right-items-wrapper">
-
-        <Link to="/events/calendar" className="btn btn-primary">
-          <FiPlus size={16} className='me-2' />
+        <Link to="/events/calendar" className="btn btn-primary d-flex align-items-center gap-2">
+          <FiPlus size={16} />
           <span>New Event</span>
+          <button 
+            className="btn-close ms-2" 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              // Close the modal/return to previous page
+              window.history.back();
+            }}
+            aria-label="Close"
+          >
+            <FiX size={16} />
+          </button>
         </Link>
       </div>
       <div id="collapseOne" className="accordion-collapse collapse page-header-collapse">

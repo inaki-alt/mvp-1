@@ -11,10 +11,15 @@ import LeadssTable from "@/components/leads/LeadsTable.jsx";
 import SiteOverviewStatistics from "@/components/widgetsStatistics/SiteOverviewStatistics.jsx";
 import CalendarView from "@/components/calender/CalendarView.jsx";
 import EventCarousel from "@/components/calender/EventCarrusel.jsx";
-
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
+    const navigate = useNavigate();
 
+    const handleEditEvent = (eventName) => {
+        // Navigate to the events management page with the event name as a query parameter
+        navigate(`/events?event=${encodeURIComponent(eventName)}`);
+    };
 
     return (
         <>
@@ -33,8 +38,27 @@ const Home = () => {
                             <PendingMessages title={"Pending Messages"}/>
                         </div>
                     </div>
-                    <VolunteersView title={"Volunteers Pending Approval"}/>
-                    {/*    <LeadssTable title={"Volunteers Pending Approval"} />*/}
+                    <div className="col-12">
+                        <div className="card stretch stretch-full">
+                            <VolunteersView 
+                                title={"Volunteers Pending Approval"}
+                                columns={[
+                                    'volunteer_name',
+                                    'event_name',
+                                    'event_date',
+                                    'actions'
+                                ]}
+                                onEditEvent={handleEditEvent}
+                                buttonStyle={{
+                                    backgroundColor: 'black',
+                                    color: 'white',
+                                    border: '1px solid black'
+                                }}
+                                showViewAll={true}
+                                viewAllLink="/volunteers"
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
             <Footer/>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { supabase } from "@/supabaseClient";
+import { useNavigate } from 'react-router-dom';
+import { FiEdit } from 'react-icons/fi';
 import "swiper/css";
 import "swiper/css/navigation";
 import "./EventCarrusel.css";
@@ -9,6 +11,7 @@ import "./EventCarrusel.css";
 const EventCarousel = () => {
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -78,6 +81,10 @@ const EventCarousel = () => {
     fetchEvents();
   }, []);
 
+  const handleEditEvent = (eventName) => {
+    navigate(`/events?event=${encodeURIComponent(eventName)}`);
+  };
+
   return (
     <div className="events-container">
       <h1 className="events-header">Upcoming Events</h1>
@@ -99,7 +106,15 @@ const EventCarousel = () => {
             events.map((event) => (
               <SwiperSlide key={event.id}>
                 <div className="event-card">
-                  <h2 className="event-title">{event.title}</h2>
+                  <div className="event-header">
+                    <h2 className="event-title">{event.title}</h2>
+                    <button 
+                      className="edit-button"
+                      onClick={() => handleEditEvent(event.title)}
+                    >
+                      <FiEdit /> Edit
+                    </button>
+                  </div>
                   <div className="info-section">
                     <div className="info-label">Date &amp; Time</div>
                     <div className="info-content">
