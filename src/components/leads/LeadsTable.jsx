@@ -4,6 +4,8 @@ import { FiEye, FiMoreHorizontal} from 'react-icons/fi'
 import Dropdown from '@/components/shared/Dropdown';
 import SelectDropdown from '@/components/shared/SelectDropdown';
 import { leadTableData } from '@/utils/fackData/leadTableData';
+import CSVImportModal from './CSVImportModal';
+import { toast } from 'react-toastify';
 
 
 const actions = [
@@ -27,6 +29,17 @@ const TableCell = memo(({ options, defaultSelect }) => {
 
 
 const LeadssTable = ({title}) => {
+    const [tableData, setTableData] = useState(leadTableData);
+    const [showModal, setShowModal] = useState(false);
+
+    const handleModalConfirm = (parsedData) => {
+        const newData = parsedData.map(item => ({
+            ...item,
+            volunteer_name: { name: item.volunteer_name || '' },
+        }));
+        setTableData(prevData => [...prevData, ...newData]);
+    };
+
     const columns = [
         {
             accessorKey: 'id',
@@ -122,7 +135,19 @@ const LeadssTable = ({title}) => {
     ]
     return (
         <>
-            <Table title={title} data={leadTableData} columns={columns} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h2>{title}</h2>
+                <button onClick={() => setShowModal(true)} className="btn btn-primary">
+                    Import CSV
+                </button>
+            </div>
+            <Table title={title} data={tableData} columns={columns} />
+            {showModal && (
+                <CSVImportModal 
+                    onClose={() => setShowModal(false)}
+                    onConfirm={handleModalConfirm}
+                />
+            )}
         </>
     )
 }
