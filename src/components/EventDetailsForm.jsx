@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FaTimes } from 'react-icons/fa';
-import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 const EventDetailsForm = ({ event, onSave, onDelete, onClose }) => {
-  // Derive initial values from event, with defaults as needed
+  // Derive initial values from the event object or provide defaults
   const initialEventDate = new Date(event.event_time).toISOString().split('T')[0];
   const initialStartTime = new Date(event.event_time).toISOString().substr(11, 5);
-  const initialEndTime = event.end_time
+  const initialEndTime = event.end_time 
     ? new Date(event.end_time).toISOString().substr(11, 5)
-    : new Date(new Date(event.event_time).getTime() + 60 * 60 * 1000)
-        .toISOString()
-        .substr(11, 5);
+    : new Date(new Date(event.event_time).getTime() + 60 * 60 * 1000).toISOString().substr(11, 5);
 
   const [eventName, setEventName] = useState(event.event_name || '');
   const [eventDate, setEventDate] = useState(initialEventDate);
@@ -22,17 +19,14 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose }) => {
   const [minVolunteers, setMinVolunteers] = useState(event.min_volunteers || '');
   const [maxVolunteers, setMaxVolunteers] = useState(event.max_volunteers || '');
   const [eventDescription, setEventDescription] = useState(event.description || '');
-  
-  // State for delete confirmation modal
-  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
 
-  // Calculate event duration (read-only)
+  // Calculate event duration for display (read-only field)
   const calculateDuration = () => {
     const start = new Date(`${eventDate}T${eventTime}`);
     const end = new Date(`${eventDate}T${eventEndTime}`);
     let diff = end - start;
     if (diff < 0) {
-      diff += 24 * 60 * 60 * 1000; // adjust for events passing midnight
+      diff += 24 * 60 * 60 * 1000; // Adjust if event passes midnight
     }
     const totalMinutes = Math.floor(diff / 60000);
     const hours = Math.floor(totalMinutes / 60);
@@ -57,23 +51,14 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose }) => {
     onSave(updatedEvent);
   };
 
-  const handleDelete = () => {
-    onDelete(event);
-  };
-
-  const handleConfirmDelete = () => {
-    handleDelete();
-    setDeleteModalOpen(false);
-  };
-
-  const handleCancelDelete = () => {
-    setDeleteModalOpen(false);
-  };
+  const handleDelete = () => onDelete(event);
 
   return (
     <div className="event-details-form card p-4 shadow" style={{ background: '#fff', borderRadius: '10px' }}>
       <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
-        <h4 className="mb-0" style={{ color: '#333' }}>Edit Event</h4>
+        <h4 className="mb-0" style={{ color: '#333' }}>
+          {event.id ? 'Edit Event' : 'Create Event'}
+        </h4>
         <button onClick={onClose} className="btn btn-sm btn-outline-secondary">
           <FaTimes />
         </button>
@@ -195,16 +180,12 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose }) => {
         <button onClick={handleSave} className="btn btn-primary">
           Save
         </button>
-        <button onClick={() => setDeleteModalOpen(true)} className="btn btn-danger">
-          Delete
-        </button>
+        {event.id && (
+          <button onClick={handleDelete} className="btn btn-danger">
+            Delete
+          </button>
+        )}
       </div>
-
-      <DeleteConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onConfirm={handleConfirmDelete}
-        onCancel={handleCancelDelete}
-      />
     </div>
   );
 };
