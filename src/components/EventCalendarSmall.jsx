@@ -264,6 +264,7 @@ const EventCalendarSmall = ({ externalOnSelectEvent }) => {
           >
             {selectedEventItem ? (
               <EventDetailsForm
+                key={selectedEventItem.event.event_time}
                 event={selectedEventItem.event}
                 onSave={handleInternalSaveEvent}
                 onDelete={handleInternalDeleteEvent}

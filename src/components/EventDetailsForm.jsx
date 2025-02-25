@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { FaTimes } from 'react-icons/fa';
 import { parseDateTime, formatTimeString, formatEventDate } from '@/utils/eventUtils';
 
-const EventDetailsForm = ({ event, onSave, onDelete, onClose }) => {
+const EventDetailsForm = ({ event, onSave, onDelete, onClose, hideCloseButton }) => {
   const startDate = parseDateTime(event.start_time);
   const endDate = parseDateTime(event.end_time);
 
@@ -16,6 +16,7 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose }) => {
   const [minVolunteers, setMinVolunteers] = useState(event.min_volunteers || '');
   const [maxVolunteers, setMaxVolunteers] = useState(event.max_volunteers || '');
   const [eventDescription, setEventDescription] = useState(event.description || '');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const calculateDuration = () => {
     const start = new Date(`${eventDate}T${eventTime}`);
@@ -47,17 +48,27 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose }) => {
     onSave(updatedEvent);
   };
 
-  const handleDelete = () => onDelete(event);
+  // Called when the user confirms deletion in the modal.
+  const confirmDelete = () => {
+    onDelete(event);
+    setShowDeleteModal(false);
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
 
   return (
     <div className="event-details-form card p-4 shadow" style={{ background: '#fff', borderRadius: '10px' }}>
       <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h4 className="mb-0" style={{ color: '#333' }}>
-          {event.id ? 'Edit Event' : 'Create Event'}
+          Edit Event
         </h4>
-        <button onClick={onClose} className="btn btn-sm btn-outline-secondary">
-          <FaTimes />
-        </button>
+        {!hideCloseButton && (
+          <button onClick={onClose} className="btn btn-sm btn-outline-secondary">
+            <FaTimes />
+          </button>
+        )}
       </div>
       
       <div className="mb-3">
@@ -176,12 +187,48 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose }) => {
         <button onClick={handleSave} className="btn btn-primary">
           Save
         </button>
-        {event.id && (
-          <button onClick={handleDelete} className="btn btn-danger">
-            Delete
-          </button>
-        )}
+        <button onClick={handleDeleteClick} className="btn btn-danger">
+          Delete
+        </button>
       </div>
+
+      {showDeleteModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            height: '100vh',
+            width: '100vw',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              background: 'white',
+              padding: '2rem',
+              borderRadius: '8px',
+              width: '90%',
+              maxWidth: '400px',
+            }}
+          >
+            <h5>Confirm Delete Event</h5>
+            <p>Are you sure you want to delete this event?</p>
+            <div className="d-flex justify-content-end gap-2">
+              <button onClick={confirmDelete} className="btn btn-danger">
+                Yes, Delete
+              </button>
+              <button onClick={() => setShowDeleteModal(false)} className="btn btn-secondary">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -191,6 +238,7 @@ EventDetailsForm.propTypes = {
   onSave: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
+  hideCloseButton: PropTypes.bool,
 };
 
 export default EventDetailsForm; 
