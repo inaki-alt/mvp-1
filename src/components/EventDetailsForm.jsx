@@ -1,24 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { FaTimes } from 'react-icons/fa';
 
-const EventDetailsForm = ({ event, onSave, onDelete, onClose }) => {
-  // Derive initial values from the event object or provide defaults
-  const initialEventDate = new Date(event.event_time).toISOString().split('T')[0];
-  const initialStartTime = new Date(event.event_time).toISOString().substr(11, 5);
-  const initialEndTime = event.end_time 
-    ? new Date(event.end_time).toISOString().substr(11, 5)
-    : new Date(new Date(event.event_time).getTime() + 60 * 60 * 1000).toISOString().substr(11, 5);
+const EventDetailsForm = ({ event, onSave, onDelete, onClose, hideCloseButton }) => {
+  const [eventName, setEventName] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventTime, setEventTime] = useState('');
+  const [eventEndTime, setEventEndTime] = useState('');
+  const [locationName, setLocationName] = useState('');
+  const [eventAddress, setEventAddress] = useState('');
+  const [minVolunteers, setMinVolunteers] = useState('');
+  const [maxVolunteers, setMaxVolunteers] = useState('');
+  const [eventDescription, setEventDescription] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const [eventName, setEventName] = useState(event.event_name || '');
-  const [eventDate, setEventDate] = useState(initialEventDate);
-  const [eventTime, setEventTime] = useState(initialStartTime);
-  const [eventEndTime, setEventEndTime] = useState(initialEndTime);
-  const [locationName, setLocationName] = useState(event.location || '');
-  const [eventAddress, setEventAddress] = useState(event.address || '');
-  const [minVolunteers, setMinVolunteers] = useState(event.min_volunteers || '');
-  const [maxVolunteers, setMaxVolunteers] = useState(event.max_volunteers || '');
-  const [eventDescription, setEventDescription] = useState(event.description || '');
+  // Reset/refresh the form fields whenever the event prop changes.
+  useEffect(() => {
+    const initialEventDate = new Date(event.event_time).toISOString().split('T')[0];
+    const initialStartTime = new Date(event.event_time).toISOString().substring(11, 16);
+    const initialEndTime = event.end_time 
+      ? new Date(event.end_time).toISOString().substring(11, 16)
+      : new Date(new Date(event.event_time).getTime() + 60 * 60 * 1000)
+          .toISOString()
+          .substring(11, 16);
+
+    setEventName(event.event_name || '');
+    setEventDate(initialEventDate);
+    setEventTime(initialStartTime);
+    setEventEndTime(initialEndTime);
+    setLocationName(event.location || '');
+    setEventAddress(event.address || '');
+    setMinVolunteers(event.min_volunteers || '');
+    setMaxVolunteers(event.max_volunteers || '');
+    setEventDescription(event.description || '');
+  }, [event]);
 
   // Calculate event duration for display (read-only field)
   const calculateDuration = () => {
@@ -51,17 +66,27 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose }) => {
     onSave(updatedEvent);
   };
 
-  const handleDelete = () => onDelete(event);
+  // Called when the user confirms deletion in the modal.
+  const confirmDelete = () => {
+    onDelete(event);
+    setShowDeleteModal(false);
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
 
   return (
     <div className="event-details-form card p-4 shadow" style={{ background: '#fff', borderRadius: '10px' }}>
       <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
         <h4 className="mb-0" style={{ color: '#333' }}>
-          {event.id ? 'Edit Event' : 'Create Event'}
+          Edit Event
         </h4>
-        <button onClick={onClose} className="btn btn-sm btn-outline-secondary">
-          <FaTimes />
-        </button>
+        {!hideCloseButton && (
+          <button onClick={onClose} className="btn btn-sm btn-outline-secondary">
+            <FaTimes />
+          </button>
+        )}
       </div>
       
       <div className="mb-3">
@@ -180,12 +205,48 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose }) => {
         <button onClick={handleSave} className="btn btn-primary">
           Save
         </button>
-        {event.id && (
-          <button onClick={handleDelete} className="btn btn-danger">
-            Delete
-          </button>
-        )}
+        <button onClick={handleDeleteClick} className="btn btn-danger">
+          Delete
+        </button>
       </div>
+
+      {showDeleteModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            height: '100vh',
+            width: '100vw',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              background: 'white',
+              padding: '2rem',
+              borderRadius: '8px',
+              width: '90%',
+              maxWidth: '400px',
+            }}
+          >
+            <h5>Confirm Delete Event</h5>
+            <p>Are you sure you want to delete this event?</p>
+            <div className="d-flex justify-content-end gap-2">
+              <button onClick={confirmDelete} className="btn btn-danger">
+                Yes, Delete
+              </button>
+              <button onClick={() => setShowDeleteModal(false)} className="btn btn-secondary">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -195,6 +256,7 @@ EventDetailsForm.propTypes = {
   onSave: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
+  hideCloseButton: PropTypes.bool,
 };
 
 export default EventDetailsForm; 

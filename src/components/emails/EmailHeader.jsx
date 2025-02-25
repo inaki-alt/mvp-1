@@ -59,46 +59,6 @@ const EmailHeader = ({ selectAll, handleSelectAll, showIcon, setSidebarOpen, onC
                 <a href="#" className="app-sidebar-open-trigger me-2" onClick={() => setSidebarOpen(true)}>
                     <i className="fs-20"><FiAlignLeft /></i>
                 </a>
-                <Checkbox
-                    id={"checkAll"}
-                    name={""}
-                    checked={selectAll}
-                    onChange={handleSelectAll}
-                    className="ms-1 me-2"
-                />
-                <div class={`action-list-items`}>
-                    <Dropdown
-                        dropdownItems={emailActions}
-                        triggerIcon={<FiChevronDown />}
-                        triggerPosition={"0,22"}
-                        triggerClass='avatar-md'
-                        dropdownPosition='dropdown-menu-start'
-                    />
-
-                    <Dropdown
-                        dropdownItems={tagsItems}
-                        triggerIcon={<FiTag />}
-                        triggerPosition={"0,22"}
-                        triggerClass='avatar-md'
-                        dropdownPosition='dropdown-menu-start'
-                        dropdownAutoClose='outside'
-                        tooltipTitle={"TAGS"}
-                    />
-
-
-
-
-                </div>
-                <a href="#" className="d-none d-sm-flex">
-                    <div className="avatar-text avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Refresh">
-                        <i><FiRefreshCw /></i>
-                    </div>
-                </a>
-                <a href="#" className="d-none d-sm-flex">
-                    <div className="avatar-text avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Snooze">
-                        <i><FiBell /></i>
-                    </div>
-                </a>
             </div>
             <div className="page-header-right ms-auto">
                 <div className="hstack gap-2">
@@ -113,18 +73,6 @@ const EmailHeader = ({ selectAll, handleSelectAll, showIcon, setSidebarOpen, onC
                             <li><a className="dropdown-item" href="#">Ascending</a></li>
                             <li><a className="dropdown-item" href="#">Descending</a></li>
                         </ul>
-                    </div>
-                    <div className="hstack d-none d-sm-flex">
-                        <a href="#" className="d-flex me-1">
-                            <div className="avatar-text avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Previous">
-                                <i><FiChevronLeft /></i>
-                            </div>
-                        </a>
-                        <a href="#" className="d-flex me-1">
-                            <div className="avatar-text avatar-md" data-bs-toggle="tooltip" data-bs-trigger="hover" title="Next">
-                                <i><FiChevronRight /></i>
-                            </div>
-                        </a>
                     </div>
                 </div>
             </div>

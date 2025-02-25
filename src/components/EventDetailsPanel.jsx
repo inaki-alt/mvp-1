@@ -46,10 +46,12 @@ const EventDetailsPanel = ({ selectedEvent, onSaveEvent, onDeleteEvent, onCloseE
       <div>
         {selectedEvent ? (
           <EventDetailsForm
+            key={selectedEvent.event.event_time}
             event={selectedEvent.event}
             onSave={onSaveEvent}
             onDelete={onDeleteEvent}
             onClose={onCloseEvent}
+            hideCloseButton={true}
           />
         ) : (
           <div style={{ textAlign: 'center' }}>
