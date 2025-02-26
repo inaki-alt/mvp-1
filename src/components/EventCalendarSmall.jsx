@@ -45,8 +45,10 @@ const EventCalendarSmall = ({ externalOnSelectEvent }) => {
     setEvents({
       "Sat Feb 01 2025": [
         {
+          id: "event-2025-02-01",
           event_name: "Fresh Start Food Distribution",
-          event_time: new Date(2025, 1, 1, 10, 0).getTime(),
+          start_time: new Date(2025, 1, 1, 10, 0).getTime(),
+          end_time: new Date(2025, 1, 1, 12, 0).getTime(),
           location: "Main Hall",
           organizer: "Alice Johnson",
           description: "Food packages distribution to local community."
@@ -54,8 +56,10 @@ const EventCalendarSmall = ({ externalOnSelectEvent }) => {
       ],
       "Sat Feb 08 2025": [
         {
+          id: "event-2025-02-08",
           event_name: "Hearty Harvest Giveaway",
-          event_time: new Date(2025, 1, 8, 10, 0).getTime(),
+          start_time: new Date(2025, 1, 8, 10, 0).getTime(),
+          end_time: new Date(2025, 1, 8, 12, 0).getTime(),
           location: "Community Center",
           organizer: "Bob Smith",
           description: "Celebrating the harvest with a community giveaway."
@@ -63,8 +67,10 @@ const EventCalendarSmall = ({ externalOnSelectEvent }) => {
       ],
       "Sat Feb 15 2025": [
         {
+          id: "event-2025-02-15",
           event_name: "Caring Cuisine Collection",
-          event_time: new Date(2025, 1, 15, 10, 0).getTime(),
+          start_time: new Date(2025, 1, 15, 10, 0).getTime(),
+          end_time: new Date(2025, 1, 15, 12, 0).getTime(),
           location: "Local School Hall",
           organizer: "Carol White",
           description: "Collecting and distributing cooked meals to those in need."
@@ -72,8 +78,10 @@ const EventCalendarSmall = ({ externalOnSelectEvent }) => {
       ],
       "Sat Feb 22 2025": [
         {
+          id: "event-2025-02-22",
           event_name: "Nourish Together Food Drive",
-          event_time: new Date(2025, 1, 22, 10, 0).getTime(),
+          start_time: new Date(2025, 1, 22, 10, 0).getTime(),
+          end_time: new Date(2025, 1, 22, 12, 0).getTime(),
           location: "City Park",
           organizer: "David Brown",
           description: "A drive for combining efforts to feed the hungry."
@@ -81,8 +89,10 @@ const EventCalendarSmall = ({ externalOnSelectEvent }) => {
       ],
       "Sat Mar 01 2025": [
         {
+          id: "event-2025-03-01",
           event_name: "Spring Pantry Kickoff",
-          event_time: new Date(2025, 2, 1, 10, 0).getTime(),
+          start_time: new Date(2025, 2, 1, 10, 0).getTime(),
+          end_time: new Date(2025, 2, 1, 12, 0).getTime(),
           location: "Food Bank",
           organizer: "Eve Black",
           description: "Launching the season's pantry with essentials."
@@ -90,8 +100,10 @@ const EventCalendarSmall = ({ externalOnSelectEvent }) => {
       ],
       "Sat Mar 08 2025": [
         {
+          id: "event-2025-03-08",
           event_name: "Farm Fresh Fare Day",
-          event_time: new Date(2025, 2, 8, 10, 0).getTime(),
+          start_time: new Date(2025, 2, 8, 10, 0).getTime(),
+          end_time: new Date(2025, 2, 8, 12, 0).getTime(),
           location: "Farmers' Market",
           organizer: "Frank Green",
           description: "Showcasing fresh local produce from nearby farms."
@@ -99,8 +111,10 @@ const EventCalendarSmall = ({ externalOnSelectEvent }) => {
       ],
       "Sat Mar 15 2025": [
         {
+          id: "event-2025-03-15",
           event_name: "Mid-March Meal Meetup",
-          event_time: new Date(2025, 2, 15, 10, 0).getTime(),
+          start_time: new Date(2025, 2, 15, 10, 0).getTime(),
+          end_time: new Date(2025, 2, 15, 12, 0).getTime(),
           location: "Community Kitchen",
           organizer: "Grace Blue",
           description: "Networking and meal planning for community members."
@@ -108,8 +122,10 @@ const EventCalendarSmall = ({ externalOnSelectEvent }) => {
       ],
       "Sat Mar 22 2025": [
         {
+          id: "event-2025-03-22",
           event_name: "Local Love Food Exchange",
-          event_time: new Date(2025, 2, 22, 10, 0).getTime(),
+          start_time: new Date(2025, 2, 22, 10, 0).getTime(),
+          end_time: new Date(2025, 2, 22, 12, 0).getTime(),
           location: "Downtown Center",
           organizer: "Henry Gray",
           description: "Exchange local food and explore sustainable options."
@@ -117,8 +133,10 @@ const EventCalendarSmall = ({ externalOnSelectEvent }) => {
       ],
       "Sat Mar 29 2025": [
         {
+          id: "event-2025-03-29",
           event_name: "Harvest Helpers Distribution",
-          event_time: new Date(2025, 2, 29, 10, 0).getTime(),
+          start_time: new Date(2025, 2, 29, 10, 0).getTime(),
+          end_time: new Date(2025, 2, 29, 12, 0).getTime(),
           location: "Community Hall",
           organizer: "Ivy Gold",
           description: "Final day of food distribution for the season."
@@ -195,7 +213,7 @@ const EventCalendarSmall = ({ externalOnSelectEvent }) => {
                       {event.event_name}
                     </div>
                     <div style={{ color: '#555', marginBottom: '0.5rem' }}>
-                      {format(event.event_time, 'HH:mm')} - {format(selectedDate, 'EEEE - d MMM')}
+                      {format(event.start_time, 'HH:mm')} - {format(selectedDate, 'EEEE - d MMM')}
                     </div>
                     <div style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>
                       Location: {event.location}
