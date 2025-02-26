@@ -1,26 +1,22 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FaTimes } from 'react-icons/fa';
+import { parseDateTime, formatTimeString, formatEventDate } from '@/utils/eventUtils';
 
 const EventDetailsForm = ({ event, onSave, onDelete, onClose }) => {
-  // Derive initial values from the event object or provide defaults
-  const initialEventDate = new Date(event.event_time).toISOString().split('T')[0];
-  const initialStartTime = new Date(event.event_time).toISOString().substr(11, 5);
-  const initialEndTime = event.end_time 
-    ? new Date(event.end_time).toISOString().substr(11, 5)
-    : new Date(new Date(event.event_time).getTime() + 60 * 60 * 1000).toISOString().substr(11, 5);
+  const startDate = parseDateTime(event.start_time);
+  const endDate = parseDateTime(event.end_time);
 
   const [eventName, setEventName] = useState(event.event_name || '');
-  const [eventDate, setEventDate] = useState(initialEventDate);
-  const [eventTime, setEventTime] = useState(initialStartTime);
-  const [eventEndTime, setEventEndTime] = useState(initialEndTime);
+  const [eventDate, setEventDate] = useState(formatEventDate(startDate));
+  const [eventTime, setEventTime] = useState(formatTimeString(startDate));
+  const [eventEndTime, setEventEndTime] = useState(formatTimeString(endDate));
   const [locationName, setLocationName] = useState(event.location || '');
   const [eventAddress, setEventAddress] = useState(event.address || '');
   const [minVolunteers, setMinVolunteers] = useState(event.min_volunteers || '');
   const [maxVolunteers, setMaxVolunteers] = useState(event.max_volunteers || '');
   const [eventDescription, setEventDescription] = useState(event.description || '');
 
-  // Calculate event duration for display (read-only field)
   const calculateDuration = () => {
     const start = new Date(`${eventDate}T${eventTime}`);
     const end = new Date(`${eventDate}T${eventEndTime}`);
@@ -40,13 +36,13 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose }) => {
     const updatedEvent = {
       ...event,
       event_name: eventName,
-      event_time: startDateTime.getTime(),
+      start_time: startDateTime.getTime(),
       end_time: endDateTime.getTime(),
-      location: locationName,
-      address: eventAddress,
-      min_volunteers: parseInt(minVolunteers, 10),
-      max_volunteers: parseInt(maxVolunteers, 10),
-      description: eventDescription,
+      location: locationName || '',
+      address: eventAddress || '',
+      min_volunteers: Number(minVolunteers || 0),
+      max_volunteers: Number(maxVolunteers || 0),
+      description: eventDescription || ''
     };
     onSave(updatedEvent);
   };
