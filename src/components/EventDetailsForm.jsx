@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { FaTimes } from 'react-icons/fa';
 import { parseDateTime, formatTimeString, formatEventDate } from '@/utils/eventUtils';
 
-const EventDetailsForm = ({ event, onSave, onDelete, onClose, hideCloseButton }) => {
+const EventDetailsForm = ({ event, onSave, onDelete }) => {
   const startDate = parseDateTime(event.start_time);
   const endDate = parseDateTime(event.end_time);
 
@@ -48,7 +48,6 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose, hideCloseButton })
     onSave(updatedEvent);
   };
 
-  // Called when the user confirms deletion in the modal.
   const confirmDelete = () => {
     onDelete(event);
     setShowDeleteModal(false);
@@ -64,11 +63,6 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose, hideCloseButton })
         <h4 className="mb-0" style={{ color: '#333' }}>
           Edit Event
         </h4>
-        {!hideCloseButton && (
-          <button onClick={onClose} className="btn btn-sm btn-outline-secondary">
-            <FaTimes />
-          </button>
-        )}
       </div>
       
       <div className="mb-3">
@@ -236,9 +230,7 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose, hideCloseButton })
 EventDetailsForm.propTypes = {
   event: PropTypes.object.isRequired,
   onSave: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired,
-  hideCloseButton: PropTypes.bool,
+  onDelete: PropTypes.func.isRequired
 };
 
 export default EventDetailsForm; 
