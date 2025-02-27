@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { FaTimes } from 'react-icons/fa';
+import { supabase } from '@/supabaseClient';
 
 const EventDetailsForm = ({ event, onSave, onDelete, onClose, hideCloseButton }) => {
   const [eventName, setEventName] = useState('');
@@ -13,6 +14,8 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose, hideCloseButton })
   const [maxVolunteers, setMaxVolunteers] = useState('');
   const [eventDescription, setEventDescription] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Reset/refresh the form fields whenever the event prop changes.
   useEffect(() => {
@@ -28,12 +31,22 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose, hideCloseButton })
     setEventDate(initialEventDate);
     setEventTime(initialStartTime);
     setEventEndTime(initialEndTime);
-    setLocationName(event.location || '');
-    setEventAddress(event.address || '');
+    setLocationName(event.location_name || event.location || '');
+    setEventAddress(event.location_address || '');
     setMinVolunteers(event.min_volunteers || '');
     setMaxVolunteers(event.max_volunteers || '');
     setEventDescription(event.description || '');
   }, [event]);
+
+  // Hide success message after 3 seconds
+  useEffect(() => {
+    if (saveSuccess) {
+      const timer = setTimeout(() => {
+        setSaveSuccess(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [saveSuccess]);
 
   // Calculate event duration for display (read-only field)
   const calculateDuration = () => {
@@ -49,27 +62,118 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose, hideCloseButton })
     return `${hours}h ${minutes}m`;
   };
 
-  const handleSave = () => {
-    const startDateTime = new Date(`${eventDate}T${eventTime}`);
-    const endDateTime = new Date(`${eventDate}T${eventEndTime}`);
-    const updatedEvent = {
-      ...event,
-      event_name: eventName,
-      event_time: startDateTime.getTime(),
-      end_time: endDateTime.getTime(),
-      location: locationName,
-      address: eventAddress,
-      min_volunteers: parseInt(minVolunteers, 10),
-      max_volunteers: parseInt(maxVolunteers, 10),
-      description: eventDescription,
-    };
-    onSave(updatedEvent);
+  const handleSave = async () => {
+    setIsSubmitting(true);
+    
+    try {
+      const startDateTime = new Date(`${eventDate}T${eventTime}`);
+      const endDateTime = new Date(`${eventDate}T${eventEndTime}`);
+      
+      // Prepare the updated event object for the UI
+      const updatedEvent = {
+        ...event,
+        event_name: eventName,
+        event_time: startDateTime.getTime(),
+        end_time: endDateTime.getTime(),
+        location: locationName, // Keep location for backward compatibility
+        location_name: locationName,
+        location_address: eventAddress,
+        min_volunteers: parseInt(minVolunteers, 10) || 0,
+        max_volunteers: parseInt(maxVolunteers, 10) || 0,
+        description: eventDescription,
+      };
+      
+      // Update the event in Supabase with only the fields that exist in the schema
+      const { error } = await supabase
+        .from("events")
+        .update({
+          title: eventName,
+          description: eventDescription,
+          start_time: startDateTime.toISOString(),
+          end_time: endDateTime.toISOString(),
+          location: locationName, // Update location field separately
+          location_name: locationName, // Store location name separately
+          location_address: eventAddress, // Store address separately
+          min_volunteers: parseInt(minVolunteers, 10) || 0,
+          max_volunteers: parseInt(maxVolunteers, 10) || 0
+        })
+        .eq("id", event.id);
+      
+      if (error) {
+        console.error("Error updating event:", error);
+        alert("Failed to update event. Please try again.");
+        return;
+      }
+      
+      // Show success message
+      setSaveSuccess(true);
+      
+      // Fetch the updated event from Supabase to ensure we have the latest data
+      const { data: refreshedEvent, error: refreshError } = await supabase
+        .from("events")
+        .select("*")
+        .eq("id", event.id)
+        .single();
+        
+      if (refreshError) {
+        console.error("Error refreshing event data:", refreshError);
+      } else if (refreshedEvent) {
+        // Transform the refreshed data to match our expected format
+        const formattedEvent = {
+          id: refreshedEvent.id,
+          event_name: refreshedEvent.title,
+          event_time: new Date(refreshedEvent.start_time).getTime(),
+          end_time: new Date(refreshedEvent.end_time).getTime(),
+          location: refreshedEvent.location,
+          location_name: refreshedEvent.location_name,
+          location_address: refreshedEvent.location_address,
+          min_volunteers: refreshedEvent.min_volunteers,
+          max_volunteers: refreshedEvent.max_volunteers,
+          description: refreshedEvent.description
+        };
+        
+        // Call the onSave callback with the refreshed event
+        onSave(formattedEvent);
+      } else {
+        // If refresh fails, use our locally updated event
+        onSave(updatedEvent);
+      }
+      
+    } catch (error) {
+      console.error("Unexpected error saving event:", error);
+      alert("An error occurred while saving. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Called when the user confirms deletion in the modal.
-  const confirmDelete = () => {
-    onDelete(event);
-    setShowDeleteModal(false);
+  const confirmDelete = async () => {
+    setIsSubmitting(true);
+    
+    try {
+      // Delete the event from Supabase
+      const { error } = await supabase
+        .from("events")
+        .delete()
+        .eq("id", event.id);
+      
+      if (error) {
+        console.error("Error deleting event:", error);
+        alert("Failed to delete event. Please try again.");
+        return;
+      }
+      
+      // Call the onDelete callback
+      onDelete(event);
+      setShowDeleteModal(false);
+      
+    } catch (error) {
+      console.error("Unexpected error deleting event:", error);
+      alert("An error occurred while deleting. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDeleteClick = () => {
@@ -88,6 +192,12 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose, hideCloseButton })
           </button>
         )}
       </div>
+      
+      {saveSuccess && (
+        <div className="alert alert-success mb-3" role="alert">
+          Event saved successfully!
+        </div>
+      )}
       
       <div className="mb-3">
         <label className="form-label">Event Name</label>
@@ -202,11 +312,19 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose, hideCloseButton })
       </div>
       
       <div className="d-flex justify-content-end gap-2">
-        <button onClick={handleSave} className="btn btn-primary">
-          Save
+        <button 
+          onClick={handleSave} 
+          className="btn btn-primary"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Saving...' : 'Save'}
         </button>
-        <button onClick={handleDeleteClick} className="btn btn-danger">
-          Delete
+        <button 
+          onClick={handleDeleteClick} 
+          className="btn btn-danger"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Processing...' : 'Delete'}
         </button>
       </div>
 
@@ -237,10 +355,18 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose, hideCloseButton })
             <h5>Confirm Delete Event</h5>
             <p>Are you sure you want to delete this event?</p>
             <div className="d-flex justify-content-end gap-2">
-              <button onClick={confirmDelete} className="btn btn-danger">
-                Yes, Delete
+              <button 
+                onClick={confirmDelete} 
+                className="btn btn-danger"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Deleting...' : 'Yes, Delete'}
               </button>
-              <button onClick={() => setShowDeleteModal(false)} className="btn btn-secondary">
+              <button 
+                onClick={() => setShowDeleteModal(false)} 
+                className="btn btn-secondary"
+                disabled={isSubmitting}
+              >
                 Cancel
               </button>
             </div>

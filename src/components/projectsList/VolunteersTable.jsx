@@ -3,8 +3,8 @@ import Table from '@/components/shared/table/Table';
 import { FiAlertOctagon, FiArchive, FiClock, FiEdit3, FiEye, FiMoreHorizontal, FiPrinter, FiTrash2 } from 'react-icons/fi'
 import Dropdown from '@/components/shared/Dropdown';
 import SelectDropdown from '@/components/shared/SelectDropdown';
-import { projectTableData } from '@/utils/fackData/projectTableData';
 import PropTypes from 'prop-types';
+import { supabase } from '@/supabaseClient';
 
 const actions = [
     { label: "Edit", icon: <FiEdit3 /> },
@@ -16,7 +16,6 @@ const actions = [
     { type: "divider" },
     { label: "Delete", icon: <FiTrash2 />, },
 ];
-
 
 const TableCell = memo(({ options, defaultSelect }) => {
     const [selectedOption, setSelectedOption] = useState(null);
@@ -31,8 +30,90 @@ const TableCell = memo(({ options, defaultSelect }) => {
     );
 });
 
-const VolunteersTable = ({ title = "Volunteer List" }) => {
+TableCell.displayName = 'TableCell';
 
+const VolunteersTable = ({ title = "Volunteer List", eventId }) => {
+    const [volunteers, setVolunteers] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchVolunteers = async () => {
+            if (!eventId) {
+                setVolunteers([]);
+                setIsLoading(false);
+                return;
+            }
+
+            setIsLoading(true);
+            setError(null);
+
+            try {
+                // Fetch volunteers for the selected event
+                const { data, error } = await supabase
+                    .from('event_volunteers')
+                    .select(`
+                        id,
+                        event_id,
+                        user_id,
+                        status,
+                        created_at,
+                        users:user_id (id, email, first_name, last_name, phone_number)
+                    `)
+                    .eq('event_id', eventId);
+
+                if (error) {
+                    throw error;
+                }
+
+                // Format the data for the table
+                const formattedData = data.map(volunteer => ({
+                    id: volunteer.id,
+                    customer: {
+                        name: `${volunteer.users.first_name || ''} ${volunteer.users.last_name || ''}`.trim() || 'Unknown',
+                        email: volunteer.users.email || 'No email'
+                    },
+                    'start-date': new Date(volunteer.created_at).toLocaleDateString(),
+                    status: volunteer.status || 'pending',
+                    user_id: volunteer.user_id
+                }));
+
+                setVolunteers(formattedData);
+            } catch (err) {
+                console.error('Error fetching volunteers:', err);
+                setError('Failed to load volunteers. Please try again.');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchVolunteers();
+    }, [eventId]);
+
+    const handleStatusChange = async (volunteerId, newStatus) => {
+        try {
+            const { error } = await supabase
+                .from('event_volunteers')
+                .update({ status: newStatus })
+                .eq('id', volunteerId);
+
+            if (error) {
+                throw error;
+            }
+
+            // Update the local state
+            setVolunteers(prevVolunteers => 
+                prevVolunteers.map(volunteer => 
+                    volunteer.id === volunteerId 
+                        ? { ...volunteer, status: newStatus } 
+                        : volunteer
+                )
+            );
+        } catch (err) {
+            console.error('Error updating volunteer status:', err);
+            alert('Failed to update volunteer status. Please try again.');
+        }
+    };
 
     const columns = [
         {
@@ -90,17 +171,46 @@ const VolunteersTable = ({ title = "Volunteer List" }) => {
         },
         {
             accessorKey: 'start-date',
-            header: () => 'Start Date',
-        },
-        {
-            accessorKey: 'assigned',
-            header: () => '# of Projects Assigned',
-            cell: () => '2',
+            header: () => 'Applied Date',
         },
         {
             accessorKey: 'status',
             header: () => 'Status',
-            cell: () => 'status',
+            cell: (info) => {
+                const status = info.getValue();
+                const volunteerId = info.row.original.id;
+                
+                const getStatusBadgeClass = (status) => {
+                    switch (status.toLowerCase()) {
+                        case 'approved':
+                            return 'bg-success';
+                        case 'declined':
+                            return 'bg-danger';
+                        case 'pending':
+                            return 'bg-warning';
+                        default:
+                            return 'bg-secondary';
+                    }
+                };
+                
+                return (
+                    <div className="d-flex align-items-center">
+                        <span className={`badge ${getStatusBadgeClass(status)} me-2`}>
+                            {status}
+                        </span>
+                        <div className="dropdown">
+                            <button className="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                Change
+                            </button>
+                            <ul className="dropdown-menu">
+                                <li><button className="dropdown-item" onClick={() => handleStatusChange(volunteerId, 'approved')}>Approve</button></li>
+                                <li><button className="dropdown-item" onClick={() => handleStatusChange(volunteerId, 'declined')}>Decline</button></li>
+                                <li><button className="dropdown-item" onClick={() => handleStatusChange(volunteerId, 'pending')}>Reset to Pending</button></li>
+                            </ul>
+                        </div>
+                    </div>
+                );
+            }
         },
         {
             accessorKey: 'actions',
@@ -116,17 +226,36 @@ const VolunteersTable = ({ title = "Volunteer List" }) => {
                 headerClassName: 'text-end'
             }
         },
-    ]
+    ];
 
     return (
         <>
-            <Table title={title} data={projectTableData} columns={columns} />
+            {isLoading ? (
+                <div className="text-center py-4">
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="mt-2">Loading volunteers...</p>
+                </div>
+            ) : error ? (
+                <div className="alert alert-danger" role="alert">
+                    {error}
+                </div>
+            ) : volunteers.length === 0 ? (
+                <div className="text-center py-4">
+                    <p>No volunteers found for this event.</p>
+                    {!eventId && <p className="text-muted">Please select an event to view its volunteers.</p>}
+                </div>
+            ) : (
+                <Table title={title} data={volunteers} columns={columns} />
+            )}
         </>
-    )
-}
+    );
+};
 
 VolunteersTable.propTypes = {
     title: PropTypes.string,
+    eventId: PropTypes.string,
 };
 
-export default VolunteersTable
+export default VolunteersTable;

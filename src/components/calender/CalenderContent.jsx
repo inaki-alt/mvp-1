@@ -4,18 +4,37 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { format } from 'date-fns';
 import { FiChevronLeft } from 'react-icons/fi';
+import { supabase } from '@/supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 const CalenderContent = () => {
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     eventName: "",
     startDate: "",
     startTime: "",
+    endTime: "",
     locationName: "",
     locationAddress: "",
     minVolunteers: "",
     maxVolunteers: "",
     eventDescription: "",
   });
+
+  // Generate time options in 30-minute intervals
+  const generateTimeOptions = () => {
+    const options = [];
+    for (let hour = 0; hour < 24; hour++) {
+      for (let minute of ['00', '30']) {
+        const hourFormatted = hour.toString().padStart(2, '0');
+        options.push(`${hourFormatted}:${minute}`);
+      }
+    }
+    return options;
+  };
+
+  const timeOptions = generateTimeOptions();
 
   // When a date is clicked on the mini calendar,
   // update the startDate field (using yyyy-MM-dd format)
@@ -31,22 +50,60 @@ const CalenderContent = () => {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  // Compute an end time based on the chosen start time.
-  // Here we assume a default event duration of 1 hour.
-  const computeEndTime = (startTime) => {
-    if (!startTime) return "";
-    const [hours, minutes] = startTime.split(":").map(Number);
-    const date = new Date(1970, 0, 1, hours, minutes);
-    date.setHours(date.getHours() + 1); // add one hour by default
-    return format(date, 'hh:mm a');
-  };
-
-  // Handle form submission (replace with your actual submission logic)
-  const handleSubmit = (e) => {
+  // Handle form submission with Supabase integration
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Event Created:", formData);
-    alert("Event Created! Check console for details.");
-    // Optionally reset formData or navigate away
+    setIsSubmitting(true);
+    
+    try {
+      // Get the current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) throw userError;
+      
+      if (!user) {
+        alert('You must be logged in to create an event');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // Create date objects from the form inputs
+      const startDateTime = new Date(`${formData.startDate}T${formData.startTime}`);
+      const endDateTime = new Date(`${formData.startDate}T${formData.endTime}`);
+      
+      // Format location as a combined string
+      const location = `${formData.locationName}, ${formData.locationAddress}`;
+      
+      // Insert the event into the database
+      const { data, error } = await supabase
+        .from('events')
+        .insert({
+          user_id: user.id,
+          title: formData.eventName,
+          description: formData.eventDescription,
+          start_time: startDateTime.toISOString(),
+          end_time: endDateTime.toISOString(),
+          location: location,
+          min_volunteers: parseInt(formData.minVolunteers) || 0,
+          max_volunteers: parseInt(formData.maxVolunteers) || 0,
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      console.log("Event Created:", data);
+      alert("Event successfully created!");
+      
+      // Navigate back to events list or to the new event
+      navigate('/events');
+      
+    } catch (error) {
+      console.error("Error creating event:", error);
+      alert(`Failed to create event: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Back button handler (uses browser history, modify if using react-router)
@@ -108,30 +165,41 @@ const CalenderContent = () => {
                 </div>
                 <div className="mb-3 col-md-6">
                   <label htmlFor="startTime" className="form-label">Start Time</label>
-                  <input
-                    type="time"
-                    className="form-control"
+                  <select
+                    className="form-select"
                     id="startTime"
                     name="startTime"
                     value={formData.startTime}
                     onChange={handleInputChange}
                     required
-                  />
+                  >
+                    <option value="">Select start time</option>
+                    {timeOptions.map((time) => (
+                      <option key={`start-${time}`} value={time}>
+                        {time}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
-              {/* End Time (calculated) */}
+              {/* End Time as a select dropdown */}
               <div className="mb-3">
-                <label htmlFor="endTime" className="form-label">End Time (Calculated)</label>
-                <input
-                  type="text"
-                  className="form-control"
+                <label htmlFor="endTime" className="form-label">End Time</label>
+                <select
+                  className="form-select"
                   id="endTime"
-                  value={computeEndTime(formData.startTime)}
-                  readOnly
-                />
-                {formData.startTime && (
-                  <small className="form-text text-muted">Default duration is 1 hour</small>
-                )}
+                  name="endTime"
+                  value={formData.endTime}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select end time</option>
+                  {timeOptions.map((time) => (
+                    <option key={`end-${time}`} value={time}>
+                      {time}
+                    </option>
+                  ))}
+                </select>
               </div>
               {/* Location (Name and Address) */}
               <div className="row">
@@ -205,8 +273,12 @@ const CalenderContent = () => {
                 ></textarea>
               </div>
               <div className="text-end">
-                <button type="submit" className="btn btn-primary">
-                  Create Event
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Creating...' : 'Create Event'}
                 </button>
               </div>
             </form>

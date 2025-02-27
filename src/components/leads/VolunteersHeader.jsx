@@ -48,10 +48,6 @@ const VolunteersHeader = () => {
                     iconStrokeWidth={0}
                     isAvatar={false}
                 />
-                <Link to="/Volunteers" className="btn btn-primary">
-                    <FiPlus size={16} className='me-2' />
-                    <span>New Volunteer</span>
-                </Link>
             </div>
 
             <div id="collapseOne" className="accordion-collapse collapse page-header-collapse">
