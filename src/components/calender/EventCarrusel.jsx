@@ -81,8 +81,8 @@ const EventCarousel = () => {
     fetchEvents();
   }, []);
 
-  const handleEditEvent = (eventName) => {
-    navigate(`/events?event=${encodeURIComponent(eventName)}`);
+  const handleEditEvent = (eventId) => {
+    navigate(`/events?eventId=${eventId}`);
   };
 
   return (
@@ -110,7 +110,7 @@ const EventCarousel = () => {
                     <h2 className="event-title">{event.title}</h2>
                     <button 
                       className="edit-button"
-                      onClick={() => handleEditEvent(event.title)}
+                      onClick={() => handleEditEvent(event.id)}
                     >
                       <FiEdit /> Edit
                     </button>
