@@ -127,8 +127,8 @@ const EventCarousel = () => {
     fetchEvents();
   }, [currentUser]); // Depend on currentUser so it refetches when user changes
 
-  const handleEditEvent = (eventName) => {
-    navigate(`/events?event=${encodeURIComponent(eventName)}`);
+  const handleEditEvent = (eventId) => {
+    navigate(`/events?eventId=${eventId}`);
   };
 
   const handleViewVolunteers = () => {
@@ -181,7 +181,7 @@ const EventCarousel = () => {
                     <h2 className="event-title">{event.title}</h2>
                     <button 
                       className="edit-button"
-                      onClick={() => handleEditEvent(event.title)}
+                      onClick={() => handleEditEvent(event.id)}
                     >
                       <FiEdit /> Edit
                     </button>

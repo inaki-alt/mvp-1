@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { supabase } from '@/supabaseClient'
 import PageHeader from '@/components/shared/pageHeader/PageHeader'
 import EventsListHeader from '@/components/projectsList/EventsListHeader.jsx'
 import VolunteersTable from '@/components/projectsList/VolunteersTable.jsx'
@@ -16,7 +18,43 @@ import EventDetailsPanel from '@/components/EventDetailsPanel.jsx';
 
 const EventsView = () => {
     // Lift the selected event state up to this parent.
+    const [searchParams] = useSearchParams();
     const [selectedEventItem, setSelectedEventItem] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        const eventId = searchParams.get('eventId');
+        if (!eventId) return;
+
+        setIsLoading(true);
+        supabase
+            .from('events')
+            .select('title, start_time, end_time, location, max_volunteers, description')
+            .eq('id', eventId)
+            .single()
+            .then(({ data }) => {
+                if (data) {
+                    const { title, start_time, end_time, location, max_volunteers, description } = data;
+
+                    setSelectedEventItem({
+                        dateKey: new Date(start_time).toISOString().split('T')[0],
+                        index: 0,
+                        event: {
+                            event_name: title,
+                            event_time: new Date(start_time).getTime(),
+                            end_time: new Date(end_time).getTime(),
+                            location: location,
+                            max_volunteers: max_volunteers,
+                            description: description,
+                        },
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching event:", error);
+            })
+            .finally(() => setIsLoading(false));
+    }, [searchParams]);
 
     // Pass this handler to the calendar so that when an event is clicked, the details are set.
     const handleEventSelect = (eventItem) => {
@@ -55,12 +93,20 @@ const EventsView = () => {
                     </div>
                     <div className="col-md-6">
                         <div className="card stretch stretch-full p-3" style={{ background: 'white', color: 'black' }}>
-                            <EventDetailsPanel
-                                selectedEvent={selectedEventItem}
-                                onSaveEvent={handleSaveEvent}
-                                onDeleteEvent={handleDeleteEvent}
-                                onCloseEvent={handleCloseEventDetails}
-                            />
+                            {isLoading ? (
+                                <div className="text-center p-4">
+                                    <div className="spinner-border text-primary" role="status">
+                                        <span className="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            ) : (
+                                <EventDetailsPanel
+                                    selectedEvent={selectedEventItem}
+                                    onSaveEvent={handleSaveEvent}
+                                    onDeleteEvent={handleDeleteEvent}
+                                    onCloseEvent={handleCloseEventDetails}
+                                />
+                            )}
                         </div>
                     </div>
                 </div>
