@@ -84,6 +84,8 @@ const CalenderContent = () => {
           start_time: startDateTime.toISOString(),
           end_time: endDateTime.toISOString(),
           location: location,
+          location_name: formData.locationName,
+          location_address: formData.locationAddress,
           min_volunteers: parseInt(formData.minVolunteers) || 0,
           max_volunteers: parseInt(formData.maxVolunteers) || 0,
         })
