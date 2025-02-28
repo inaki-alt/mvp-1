@@ -29,12 +29,12 @@ const EventsView = () => {
         setIsLoading(true);
         supabase
             .from('events')
-            .select('title, start_time, end_time, location, max_volunteers, description')
+            .select('title, start_time, end_time, location_name, location_address, max_volunteers, min_volunteers, description')
             .eq('id', eventId)
             .single()
             .then(({ data }) => {
                 if (data) {
-                    const { title, start_time, end_time, location, max_volunteers, description } = data;
+                    const { title, start_time, end_time, location_name, location_address, max_volunteers, min_volunteers, description } = data;
 
                     setSelectedEventItem({
                         dateKey: new Date(start_time).toISOString().split('T')[0],
@@ -43,8 +43,10 @@ const EventsView = () => {
                             event_name: title,
                             event_time: new Date(start_time).getTime(),
                             end_time: new Date(end_time).getTime(),
-                            location: location,
+                            location_name: location_name,
+                            location_address: location_address,
                             max_volunteers: max_volunteers,
+                            min_volunteers: min_volunteers,
                             description: description,
                         },
                     });
