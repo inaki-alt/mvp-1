@@ -39,7 +39,7 @@ const EventCalendarSmall = ({ externalOnSelectEvent }) => {
         // Fetch events created by the current user
         const { data: eventsData, error } = await supabase
           .from("events")
-          .select("id, title, description, start_time, end_time, location, max_volunteers, user_id")
+          .select("id, title, description, start_time, end_time, location_name, location_address, max_volunteers, min_volunteers, user_id")
           .eq("user_id", currentUser.id);
         
         if (error) {
@@ -63,10 +63,12 @@ const EventCalendarSmall = ({ externalOnSelectEvent }) => {
             event_name: event.title,
             event_time: startDate.getTime(),
             end_time: new Date(event.end_time).getTime(),
-            location: event.location,
+            location_name: event.location_name,
+            location_address: event.location_address,
             organizer: currentUser.email, // Using user email as organizer
             description: event.description,
-            max_volunteers: event.max_volunteers
+            max_volunteers: event.max_volunteers,
+            min_volunteers: event.min_volunteers
           });
         });
         
