@@ -20,12 +20,20 @@ const EventDetailsForm = ({ event, onSave, onDelete, onClose, hideCloseButton })
   // Reset/refresh the form fields whenever the event prop changes.
   useEffect(() => {
     const initialEventDate = new Date(event.event_time).toISOString().split('T')[0];
-    const initialStartTime = new Date(event.event_time).toISOString().substring(11, 16);
+    const initialStartTime = new Date(event.event_time).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false});
     const initialEndTime = event.end_time 
-      ? new Date(event.end_time).toISOString().substring(11, 16)
+      ? new Date(event.end_time).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false})
       : new Date(new Date(event.event_time).getTime() + 60 * 60 * 1000)
-          .toISOString()
-          .substring(11, 16);
+          .toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false});;
 
     setEventName(event.event_name || '');
     setEventDate(initialEventDate);
