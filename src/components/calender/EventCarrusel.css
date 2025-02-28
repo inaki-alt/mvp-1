@@ -2,7 +2,8 @@
 .events-container {
   background-color: #ffffff;
   color: #000;
-  max-width: 700px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
   padding: 2rem;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -26,6 +27,7 @@
   color: #333;
   margin-bottom: 1.5rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
 }
 
 .event-card:hover {
@@ -122,4 +124,5 @@
 /* Swiper Wrapper */
 .event-swiper-wrapper {
   position: relative;
+  width: 100%;
 }
