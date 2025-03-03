@@ -1,19 +1,10 @@
-import React, { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { supabase } from '@/supabaseClient'
-import PageHeader from '@/components/shared/pageHeader/PageHeader'
-import EventsListHeader from '@/components/projectsList/EventsListHeader.jsx'
-import VolunteersTable from '@/components/projectsList/VolunteersTable.jsx'
-import SiteOverviewStatistics from "@/components/widgetsStatistics/SiteOverviewStatistics.jsx";
-import EventCarousel from "@/components/calender/EventCarrusel.jsx";
-import CalendarView from "@/components/calender/CalendarView.jsx";
-import AppsCalender from "../../pages/apps-calender.jsx";
-import CalenderModal from "@/components/calender/CalenderModal.jsx";
-import CalenderSidebar from "@/components/calender/CalenderSidebar.jsx";
-import CalendarMonthly from "@/components/calender/CalendarMonthly.jsx";
-import {Outlet} from "react-router-dom";
-import CalenderContent from "@/components/calender/CalenderContent.jsx";
-import EventCalendarSmall from "@/components/EventCalendarSmall.jsx";
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { supabase } from '@/supabaseClient';
+import PageHeader from '@/components/shared/pageHeader/PageHeader';
+import EventsListHeader from '@/components/projectsList/EventsListHeader.jsx';
+import VolunteersTable from '@/components/projectsList/VolunteersTable.jsx';
+import EventCalendarSmall from '@/components/EventCalendarSmall.jsx';
 import EventDetailsPanel from '@/components/EventDetailsPanel.jsx';
 
 const EventsView = () => {
@@ -21,6 +12,7 @@ const EventsView = () => {
     const [searchParams] = useSearchParams();
     const [selectedEventItem, setSelectedEventItem] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [eventsForSelectedDate, setEventsForSelectedDate] = useState([]);
 
     useEffect(() => {
         const eventId = searchParams.get('eventId');
@@ -35,13 +27,14 @@ const EventsView = () => {
             .then(({ data }) => {
                 if (data) {
                     const { title, start_time, end_time, location_name, location_address, max_volunteers, min_volunteers, description } = data;
+                    const eventDate = new Date(start_time);
 
                     setSelectedEventItem({
-                        dateKey: new Date(start_time).toISOString().split('T')[0],
+                        dateKey: eventDate.toDateString(),
                         index: 0,
                         event: {
                             event_name: title,
-                            event_time: new Date(start_time).getTime(),
+                            event_time: eventDate.getTime(),
                             end_time: new Date(end_time).getTime(),
                             location_name: location_name,
                             location_address: location_address,
@@ -58,9 +51,9 @@ const EventsView = () => {
             .finally(() => setIsLoading(false));
     }, [searchParams]);
 
-    // Pass this handler to the calendar so that when an event is clicked, the details are set.
-    const handleEventSelect = (eventItem) => {
-        setSelectedEventItem(eventItem);
+    const handleDateClick = (data) => {
+        setEventsForSelectedDate(data.eventsForSelectedDate);
+        setSelectedEventItem(null);
     };
 
     // Handlers for saving and deleting events from the external details panel.
@@ -80,6 +73,14 @@ const EventsView = () => {
         setSelectedEventItem(null);
     };
 
+    const handleSelectEvent = (data) => {
+        setSelectedEventItem({
+            dateKey: data.dateKey,
+            index: data.index || 0,
+            event: data.event
+        });
+    };
+
     return (
         <>
             <PageHeader>
@@ -90,7 +91,7 @@ const EventsView = () => {
                 <div className="row">
                     <div className="col-md-6">
                         <div className="card stretch stretch-full p-3" style={{ background: 'white', color: 'black' }}>
-                            <EventCalendarSmall externalOnSelectEvent={handleEventSelect}/>
+                            <EventCalendarSmall onDateClick={handleDateClick}/>
                         </div>
                     </div>
                     <div className="col-md-6">
@@ -102,12 +103,14 @@ const EventsView = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <EventDetailsPanel
-                                    selectedEvent={selectedEventItem}
-                                    onSaveEvent={handleSaveEvent}
-                                    onDeleteEvent={handleDeleteEvent}
-                                    onCloseEvent={handleCloseEventDetails}
-                                />
+                            <EventDetailsPanel
+                                selectedEvent={selectedEventItem}
+                                onSaveEvent={handleSaveEvent}
+                                onDeleteEvent={handleDeleteEvent}
+                                onCloseEvent={handleCloseEventDetails}
+                                eventsForSelectedDate={eventsForSelectedDate}
+                                onEventSelect={handleSelectEvent}
+                            />
                             )}
                         </div>
                     </div>
@@ -122,7 +125,7 @@ const EventsView = () => {
                 </div>
             </div>
         </>
-    )
-}
+    );
+};
 
-export default EventsView
+export default EventsView;
