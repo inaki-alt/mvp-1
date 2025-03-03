@@ -75,7 +75,7 @@ const EventDetailsPanel = ({
                   {event.event_name}
                 </div>
                 <div style={{ color: '#555', marginBottom: '0.5rem' }}>
-                  {format(event.event_time, 'h:mm a')}
+                  {format(event.event_time, 'EEEE, MMMM d, h:mm a')}
                 </div>
                 <div style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>
                   Location: {event.location_name}
