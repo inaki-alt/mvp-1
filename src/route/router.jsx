@@ -77,6 +77,7 @@ import VolunteerMessages from "../components/volunteer/VolunteerMessages";
 import RewardsMarketplace from "../components/volunteer/RewardsMarketplace";
 import ProtectedRoute from '@/components/ProtectedRoute';
 import NonProfitSignUp from "../pages/NonProfitSignUp";
+import VolunteerSignUp from "../pages/VolunteerSignUp";
 
 export const router = createBrowserRouter([
     {
@@ -454,6 +455,10 @@ export const router = createBrowserRouter([
             {
                 path: "nonprofit-signup",
                 element: <NonProfitSignUp />
+            },
+            {
+                path: "volunteer-signup",
+                element: <VolunteerSignUp />
             },
             {
                 path: "/authentication/login/cover",
