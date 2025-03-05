@@ -38,8 +38,12 @@ const LoginMinimal = () => {
 
             if (userError) throw userError;
 
-            // Redirect to root path after successful login
-            navigate('/');
+            // Conditional navigation based on user role
+            if (userData.is_volunteer) {
+                navigate('/volunteer/home'); // Navigate to volunteer home dashboard
+            } else {
+                navigate('/'); // Navigate to the default home/dashboard
+            }
             
         } catch (error) {
             console.error('Error during sign in:', error);
@@ -106,6 +110,12 @@ const LoginMinimal = () => {
                                     className="btn btn-lg btn-outline-primary w-100"
                                 >
                                     Sign up as Non-Profit
+                                </button>
+                                <button 
+                                    onClick={() => navigate('/volunteer-signup')}
+                                    className="btn btn-lg btn-outline-primary w-100 mt-3"
+                                >
+                                    Sign up as Volunteer
                                 </button>
                             </div>
                         </div>
